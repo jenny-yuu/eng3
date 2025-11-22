@@ -25,205 +25,210 @@
             margin: 0;
             padding: 10px;
             color: var(--text-color);
-            /* 關鍵修改：不再鎖定高度，允許自然滾動 */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
+        /* --- 1. 全局大標題 H1 (修正處：字體自動縮小) --- */
         h1 {
-            font-size: clamp(1.8rem, 5vw, 2.5rem);
-            margin: 10px 0 15px 0;
+            /* clamp(最小值, 理想值, 最大值) -> 手機上會自動變小到 1.5rem */
+            font-size: clamp(1.5rem, 6vw, 2.5rem);
+            margin: 5px 0 15px 0;
             color: #E65100;
             text-shadow: 2px 2px white;
             font-weight: 700;
             text-align: center;
             line-height: 1.1;
+            padding: 0 10px; /* 防止文字貼邊 */
         }
 
-        /* --- 導航列 (橫向滑動) --- */
+        /* --- 導航列 --- */
         .nav-bar {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 15px;
             background: white;
-            padding: 10px;
+            padding: 8px;
             border-radius: 50px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             width: 100%;
             max-width: 600px;
-            overflow-x: auto; /* 手機上可左右滑動 */
+            overflow-x: auto;
             white-space: nowrap;
-            scrollbar-width: none; /* Firefox 隱藏滾動條 */
-            position: sticky;
-            top: 10px;
+            scrollbar-width: none;
+            position: sticky; /* 讓導航列黏在頂端 */
+            top: 5px; 
             z-index: 100;
         }
-        .nav-bar::-webkit-scrollbar { display: none; } /* Chrome 隱藏滾動條 */
+        .nav-bar::-webkit-scrollbar { display: none; }
 
         .nav-btn {
             border: none; background: #F5F5F5; color: #777;
-            font-size: 1rem; font-weight: 600;
-            padding: 10px 20px; border-radius: 25px; cursor: pointer;
-            flex-shrink: 0; /* 防止按鈕變形 */
+            font-size: 0.9rem; font-weight: 600;
+            padding: 8px 18px; border-radius: 25px; cursor: pointer;
+            flex-shrink: 0;
             transition: all 0.2s;
         }
         .nav-btn.active {
             background: var(--accent-blue); color: white;
             transform: scale(1.05); box-shadow: 0 3px 10px rgba(66, 165, 245, 0.4);
         }
-        /* 各按鈕顏色 */
         .nav-btn:nth-child(1).active { background: #FFA726; }
         .nav-btn:nth-child(2).active { background: #AB47BC; }
         .nav-btn:nth-child(3).active { background: #26C6DA; }
         .nav-btn:nth-child(4).active { background: #EF5350; }
         .nav-btn:nth-child(5).active { background: #66BB6A; }
 
-        /* --- 主容器 (卡片) --- */
+        /* --- 主容器 --- */
         .container {
             display: none;
             background: white;
             width: 100%;
-            max-width: 800px; /* 電腦版最大寬度 */
-            min-height: 60vh; /* 確保至少有一定高度 */
-            border-radius: 25px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            border: 5px solid white;
-            padding: 20px;
+            max-width: 800px;
+            min-height: 50vh;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border: 4px solid white;
+            padding: 15px;
             flex-direction: column;
             align-items: center;
             animation: popIn 0.3s ease-out;
-            /* 關鍵：底部留白，避免手機操作條遮擋 */
-            margin-bottom: 50px; 
-            padding-bottom: 40px;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
         }
         .container.show { display: flex; }
         @keyframes popIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
+        /* --- 2. 單元小標題 H2 (修正處：縮小與優化間距) --- */
         h2 {
-            margin: 0 0 20px 0;
-            font-size: 1.6rem;
+            margin: 0 0 15px 0;
+            /* 手機上字體縮小，避免折行 */
+            font-size: clamp(1.2rem, 5vw, 1.6rem);
             color: #EC407A;
-            border-bottom: 3px dashed #eee;
+            border-bottom: 2px dashed #eee;
             width: 100%;
             text-align: center;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
+            line-height: 1.3;
         }
 
         /* --- 1. Warm Up --- */
         .warmup-box {
             display: flex;
-            flex-wrap: wrap; /* 允許換行 */
-            gap: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
             justify-content: center;
             width: 100%;
         }
         .animal-card {
-            width: 45%; /* 手機並排 */
-            min-width: 140px;
-            max-width: 250px;
-            aspect-ratio: 3/4; /* 保持比例 */
+            width: 45%; 
+            min-width: 130px;
+            max-width: 220px;
+            aspect-ratio: 3/4;
             background: #FFF3E0;
             border: 4px solid #FFB74D;
-            border-radius: 20px;
+            border-radius: 15px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             cursor: pointer;
+            transition: transform 0.1s;
         }
+        .animal-card:active { transform: scale(0.95); }
         .animal-card.bird { background: #E3F2FD; border-color: #64B5F6; }
-        .silhouette { font-size: 4rem; filter: brightness(0) opacity(0.2); transition: 0.5s; }
+        
+        /* 調整剪影大小 */
+        .silhouette { font-size: clamp(3rem, 15vw, 5rem); filter: brightness(0) opacity(0.2); transition: 0.5s; }
         .animal-card.revealed .silhouette { filter: none; opacity: 1; transform: scale(1.1); }
-        .sound-badge { margin-top: 10px; background: white; padding: 5px 10px; border-radius: 10px; font-size: 0.9rem; font-weight: bold; color: #555; }
+        .sound-badge { margin-top: 8px; background: white; padding: 4px 8px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; color: #555; }
 
-        /* --- 2. Review (Guessing) --- */
+        /* --- 2. Review --- */
         .review-wrapper {
-            display: flex;
-            flex-direction: column; /* 手機預設垂直排列 */
-            width: 100%;
-            gap: 20px;
+            display: flex; flex-direction: column; width: 100%; gap: 15px;
         }
         .review-col {
             background: var(--cat-bg); border: 3px solid #FFD54F;
-            border-radius: 20px; padding: 15px;
-            width: 100%;
+            border-radius: 15px; padding: 10px; width: 100%;
         }
         .col-bird { background: var(--bird-bg); border-color: #4FC3F7; }
-        .review-header { font-size: 1.4rem; font-weight: 700; margin-bottom: 10px; text-align: center; }
-        
-        .guess-grid { display: grid; gap: 10px; }
+        .review-header { font-size: 1.2rem; font-weight: 700; margin-bottom: 10px; text-align: center; }
+        .guess-grid { display: grid; gap: 8px; }
         .guess-card {
-            background: #CFD8DC; border: 3px dashed #B0BEC5;
-            padding: 12px; border-radius: 15px;
+            background: #CFD8DC; border: 2px dashed #B0BEC5;
+            padding: 10px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            min-height: 60px; cursor: pointer;
+            min-height: 50px; cursor: pointer;
         }
         .guess-card.revealed { background: white; border-style: solid; }
         .col-cat .guess-card.revealed { border-color: #FFD54F; }
         .col-bird .guess-card.revealed { border-color: #4FC3F7; }
-        .q-mark { font-size: 1.5rem; font-weight: 900; color: #607D8B; }
-        .answer-content { display: none; align-items: center; gap: 10px; font-size: 1.2rem; font-weight: bold; }
+        .q-mark { font-size: 1.2rem; font-weight: 900; color: #607D8B; }
+        .answer-content { display: none; align-items: center; gap: 8px; font-size: 1.1rem; font-weight: bold; }
         .guess-card.revealed .q-mark { display: none; }
         .guess-card.revealed .answer-content { display: flex; }
 
         /* --- 3. Practice --- */
         .top-bar {
-            background: var(--accent-blue); color: white; width: 100%; padding: 15px;
-            border-radius: 15px; text-align: center; font-size: 1.6rem; font-weight: bold;
-            margin-bottom: 15px;
+            background: var(--accent-blue); color: white; width: 100%; padding: 10px;
+            border-radius: 12px; text-align: center; font-size: 1.3rem; font-weight: bold;
+            margin-bottom: 10px;
         }
         .colorful-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 手機兩列 */
-            gap: 10px; width: 100%;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px; width: 100%;
         }
         .vocab-card {
-            background: white; border: 3px solid #eee; border-radius: 15px;
-            padding: 15px 5px; text-align: center; cursor: pointer;
+            background: white; border: 2px solid #eee; border-radius: 12px;
+            padding: 10px 5px; text-align: center; cursor: pointer;
         }
-        .vocab-card:active { background: #FFFDE7; transform: scale(0.98); }
-        .v-icon { font-size: 2.5rem; display: block; }
-        .v-text { font-size: 1.1rem; font-weight: 700; color: #555; margin-top: 5px; display: block;}
+        .vocab-card:active { background: #FFFDE7; }
+        .v-icon { font-size: 2rem; display: block; }
+        .v-text { font-size: 1rem; font-weight: 700; color: #555; margin-top: 4px; display: block;}
 
         /* --- 4. Production --- */
         .spin-wrapper {
-            width: 100%; background: #F3E5F5; border-radius: 20px; padding: 30px 10px;
+            width: 100%; background: #F3E5F5; border-radius: 15px; padding: 20px 10px;
             display: flex; flex-direction: column; align-items: center;
         }
-        .big-emoji { font-size: 6rem; margin-bottom: 10px; }
-        .big-text { font-size: 2rem; color: #8E24AA; font-weight: 800; margin-bottom: 20px; text-align: center; }
+        .big-emoji { font-size: 5rem; margin-bottom: 5px; }
+        .big-text { font-size: 1.8rem; color: #8E24AA; font-weight: 800; margin-bottom: 15px; text-align: center; }
         .spin-btn {
             background: #EC407A; color: white; border: none;
-            padding: 15px 50px; font-size: 1.5rem; border-radius: 50px; font-weight: 700;
-            box-shadow: 0 5px 0 #C2185B; cursor: pointer;
+            padding: 12px 40px; font-size: 1.4rem; border-radius: 40px; font-weight: 700;
+            box-shadow: 0 4px 0 #C2185B; cursor: pointer;
         }
         .spin-btn:active { transform: translateY(4px); box-shadow: none; }
 
         /* --- 5. Conclusion --- */
-        .conclusion-box { text-align: center; width: 100%; padding: 20px 0; }
-        .q-large { font-size: 1.5rem; color: #37474F; font-weight: 700; margin-bottom: 20px; }
-        .ans-wrapper { display: flex; gap: 20px; justify-content: center; margin-bottom: 20px; }
+        .conclusion-box { text-align: center; width: 100%; padding: 10px 0; }
+        .q-large { font-size: 1.3rem; color: #37474F; font-weight: 700; margin-bottom: 15px; }
+        .ans-wrapper { display: flex; gap: 15px; justify-content: center; margin-bottom: 15px; }
         .btn-choice {
-            padding: 12px 30px; font-size: 1.2rem; border: none; border-radius: 15px;
-            font-weight: 700; color: white; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            padding: 10px 25px; font-size: 1.1rem; border: none; border-radius: 12px;
+            font-weight: 700; color: white; cursor: pointer; box-shadow: 0 3px 0 rgba(0,0,0,0.2);
         }
         .btn-yes { background: #EF5350; }
         .btn-no { background: #66BB6A; }
         .final-reveal {
-            display: none; background: #FFF; border: 5px solid #66BB6A; padding: 20px;
-            border-radius: 20px; animation: popIn 0.5s;
+            display: none; background: #FFF; border: 4px solid #66BB6A; padding: 15px;
+            border-radius: 15px; animation: popIn 0.5s;
         }
 
-        /* --- 針對大螢幕 (平板/電腦) 的優化 --- */
+        /* --- 大螢幕優化 --- */
         @media (min-width: 768px) {
-            .review-wrapper { flex-direction: row; } /* 電腦版並排 */
-            .colorful-grid { grid-template-columns: repeat(4, 1fr); } /* 電腦版四列 */
-            .animal-card { width: 220px; height: 300px; } /* 電腦版卡片大一點 */
+            .review-wrapper { flex-direction: row; }
+            .colorful-grid { grid-template-columns: repeat(4, 1fr); }
+            .animal-card { width: 220px; height: 300px; }
+            h1 { font-size: 2.5rem; } /* 電腦版大標題 */
+            h2 { font-size: 1.8rem; } /* 電腦版小標題 */
         }
 
     </style>
 </head>
 <body>
 
+    <!-- 這裡的 H1 現在會自動縮小，不會再佔據整個手機畫面了 -->
     <h1>Can Cat & Bird Be Friends?</h1>
 
     <div class="nav-bar">
@@ -236,6 +241,7 @@
 
     <!-- 1. Warm Up -->
     <div id="warmup" class="container show">
+        <!-- 這裡的 H2 也做了縮小處理 -->
         <h2>Who is it? (Tap to Reveal)</h2>
         <div class="warmup-box">
             <div class="animal-card" onclick="reveal(this)">
@@ -335,7 +341,6 @@
     </div>
 
     <script>
-        // TTS 音效
         function playAudio(text) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -345,21 +350,17 @@
             }
         }
 
-        // 切換分頁 (自動滾動回頂端)
         function switchTab(id) {
             document.querySelectorAll('.container').forEach(e => e.classList.remove('show'));
             document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
             document.getElementById(id).classList.add('show');
             
-            // 更新按鈕狀態
             const tabs = ['warmup', 'review', 'practice', 'production', 'conclusion'];
             const btn = document.querySelectorAll('.nav-btn')[tabs.indexOf(id)];
             btn.classList.add('active');
             
-            // 手機友善：切換分頁時，讓按鈕滾動到中間
+            // 切換時自動定位
             btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-            
-            // 稍微往下滾一點，讓使用者看到內容變化
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 

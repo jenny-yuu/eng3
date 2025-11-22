@@ -6,12 +6,11 @@
     <title>Can Cat and Bird Be Friends?</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- 視覺系統：繽紛糖果色 --- */
+        /* --- 變數設定 --- */
         :root {
             --bg-color: #FFF9C4;
             --cat-bg: #FFF8E1;
             --bird-bg: #E1F5FE;
-            --btn-color: #FF7043;
             --accent-blue: #42A5F5;
             --text-color: #37474F;
         }
@@ -24,245 +23,201 @@
             background-image: radial-gradient(#FFE082 2px, transparent 2px);
             background-size: 30px 30px;
             margin: 0;
-            /* 改用 dvh (Dynamic Viewport Height) 解決手機瀏覽器網址列遮擋問題 */
-            height: 100dvh; 
-            overflow: hidden; 
+            padding: 10px;
+            color: var(--text-color);
+            /* 關鍵修改：不再鎖定高度，允許自然滾動 */
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 10px;
-            color: var(--text-color);
         }
 
         h1 {
-            font-size: clamp(1.5rem, 5vw, 2.2rem); /* 字體大小隨螢幕縮放 */
-            margin: 5px 0 10px 0;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            margin: 10px 0 15px 0;
             color: #E65100;
             text-shadow: 2px 2px white;
             font-weight: 700;
             text-align: center;
-            line-height: 1.2;
+            line-height: 1.1;
         }
 
-        /* --- 導航列 --- */
+        /* --- 導航列 (橫向滑動) --- */
         .nav-bar {
-            display: flex; 
-            gap: 8px; 
-            margin-bottom: 10px;
-            background: white; 
-            padding: 8px; 
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 10px;
             border-radius: 50px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            max-width: 100%;
-            overflow-x: auto; /* 允許在極小螢幕橫向滑動 */
+            width: 100%;
+            max-width: 600px;
+            overflow-x: auto; /* 手機上可左右滑動 */
             white-space: nowrap;
-            /* 隱藏滾動條 */
-            -ms-overflow-style: none; 
-            scrollbar-width: none;
+            scrollbar-width: none; /* Firefox 隱藏滾動條 */
+            position: sticky;
+            top: 10px;
+            z-index: 100;
         }
-        .nav-bar::-webkit-scrollbar { display: none; }
+        .nav-bar::-webkit-scrollbar { display: none; } /* Chrome 隱藏滾動條 */
 
         .nav-btn {
             border: none; background: #F5F5F5; color: #777;
-            font-family: inherit; font-size: 0.9rem; font-weight: 600;
-            padding: 8px 16px; border-radius: 25px; cursor: pointer;
+            font-size: 1rem; font-weight: 600;
+            padding: 10px 20px; border-radius: 25px; cursor: pointer;
+            flex-shrink: 0; /* 防止按鈕變形 */
             transition: all 0.2s;
-            flex-shrink: 0; /* 防止按鈕被擠壓變形 */
         }
         .nav-btn.active {
             background: var(--accent-blue); color: white;
             transform: scale(1.05); box-shadow: 0 3px 10px rgba(66, 165, 245, 0.4);
         }
-        /* 按鈕顏色維持原樣 */
+        /* 各按鈕顏色 */
         .nav-btn:nth-child(1).active { background: #FFA726; }
         .nav-btn:nth-child(2).active { background: #AB47BC; }
         .nav-btn:nth-child(3).active { background: #26C6DA; }
         .nav-btn:nth-child(4).active { background: #EF5350; }
         .nav-btn:nth-child(5).active { background: #66BB6A; }
 
-        /* --- 主容器 --- */
+        /* --- 主容器 (卡片) --- */
         .container {
             display: none;
             background: white;
             width: 100%;
-            max-width: 1000px; /* 限制在大螢幕上的最大寬度 */
-            flex: 1; /* 佔滿剩餘高度 */
+            max-width: 800px; /* 電腦版最大寬度 */
+            min-height: 60vh; /* 確保至少有一定高度 */
             border-radius: 25px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             border: 5px solid white;
-            padding: 15px;
+            padding: 20px;
             flex-direction: column;
             align-items: center;
-            position: relative;
-            overflow-y: auto; /* 讓內容過長時容器內部可以滾動 */
-            overflow-x: hidden;
+            animation: popIn 0.3s ease-out;
+            /* 關鍵：底部留白，避免手機操作條遮擋 */
+            margin-bottom: 50px; 
+            padding-bottom: 40px;
         }
-        .container.show { display: flex; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .container.show { display: flex; }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        h2 { 
-            margin: 0 0 15px 0; 
-            font-size: 1.5rem; 
-            color: #EC407A; 
-            border-bottom: 3px dashed #eee; 
-            width: 100%; 
-            text-align: center; 
-            padding-bottom: 5px;
-            flex-shrink: 0; /* 防止標題被壓縮 */
-        }
-
-        /* --- 1. Warm-up --- */
-        .warmup-box { 
-            display: flex; 
-            gap: 20px; 
-            height: 100%; 
+        h2 {
+            margin: 0 0 20px 0;
+            font-size: 1.6rem;
+            color: #EC407A;
+            border-bottom: 3px dashed #eee;
             width: 100%;
-            align-items: center; 
+            text-align: center;
+            padding-bottom: 10px;
+        }
+
+        /* --- 1. Warm Up --- */
+        .warmup-box {
+            display: flex;
+            flex-wrap: wrap; /* 允許換行 */
+            gap: 20px;
             justify-content: center;
+            width: 100%;
         }
         .animal-card {
-            width: 250px; 
-            max-width: 45%; /* 手機上避免超出 */
-            height: 320px; 
-            max-height: 60vh; /* 手機橫放時避免過高 */
-            background: #FFF3E0; 
-            border: 4px solid #FFB74D; 
+            width: 45%; /* 手機並排 */
+            min-width: 140px;
+            max-width: 250px;
+            aspect-ratio: 3/4; /* 保持比例 */
+            background: #FFF3E0;
+            border: 4px solid #FFB74D;
             border-radius: 20px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; transition: transform 0.2s;
-            padding: 10px;
+            cursor: pointer;
         }
         .animal-card.bird { background: #E3F2FD; border-color: #64B5F6; }
-        .animal-card:hover { transform: translateY(-5px); }
-        .silhouette { font-size: clamp(4rem, 10vw, 8rem); filter: brightness(0) opacity(0.2); transition: 0.5s; }
+        .silhouette { font-size: 4rem; filter: brightness(0) opacity(0.2); transition: 0.5s; }
         .animal-card.revealed .silhouette { filter: none; opacity: 1; transform: scale(1.1); }
-        .sound-badge { margin-top: 15px; background: white; padding: 5px 10px; border-radius: 15px; font-weight: bold; color: #555; box-shadow: 0 3px 0 #ddd; font-size: 0.9rem;}
+        .sound-badge { margin-top: 10px; background: white; padding: 5px 10px; border-radius: 10px; font-size: 0.9rem; font-weight: bold; color: #555; }
 
-        /* --- 2. Review (Guessing Game Style) --- */
-        .review-wrapper { 
-            display: flex; 
-            width: 100%; 
-            height: 100%; 
-            gap: 15px; 
+        /* --- 2. Review (Guessing) --- */
+        .review-wrapper {
+            display: flex;
+            flex-direction: column; /* 手機預設垂直排列 */
+            width: 100%;
+            gap: 20px;
         }
         .review-col {
-            flex: 1; border-radius: 20px; padding: 10px;
-            display: flex; flex-direction: column; align-items: center;
-            overflow: hidden; /* 防止內部溢出 */
+            background: var(--cat-bg); border: 3px solid #FFD54F;
+            border-radius: 20px; padding: 15px;
+            width: 100%;
         }
-        .col-cat { background: var(--cat-bg); border: 3px solid #FFD54F; }
-        .col-bird { background: var(--bird-bg); border: 3px solid #4FC3F7; }
-        .review-header { font-size: 1.3rem; font-weight: 700; margin-bottom: 10px; text-align: center; }
+        .col-bird { background: var(--bird-bg); border-color: #4FC3F7; }
+        .review-header { font-size: 1.4rem; font-weight: 700; margin-bottom: 10px; text-align: center; }
         
-        .guess-grid { 
-            width: 100%; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 10px; 
-            overflow-y: auto; /* 讓列表可以獨立滾動 */
-            padding-bottom: 10px;
-            flex: 1; /* 填滿剩餘空間 */
-        }
-        
+        .guess-grid { display: grid; gap: 10px; }
         .guess-card {
-            background: #CFD8DC; 
-            border: 3px dashed #B0BEC5;
-            padding: 10px; border-radius: 15px; cursor: pointer;
+            background: #CFD8DC; border: 3px dashed #B0BEC5;
+            padding: 12px; border-radius: 15px;
             display: flex; align-items: center; justify-content: center;
-            transition: all 0.3s; min-height: 60px; flex-shrink: 0;
+            min-height: 60px; cursor: pointer;
         }
-        .guess-card:hover { transform: scale(1.02); background: #B0BEC5; }
-        .guess-card.revealed {
-            background: white; border: 3px solid; transform: scale(1);
-            box-shadow: 0 3px 5px rgba(0,0,0,0.1);
-        }
+        .guess-card.revealed { background: white; border-style: solid; }
         .col-cat .guess-card.revealed { border-color: #FFD54F; }
         .col-bird .guess-card.revealed { border-color: #4FC3F7; }
-
         .q-mark { font-size: 1.5rem; font-weight: 900; color: #607D8B; }
-        .answer-content { display: none; align-items: center; justify-content: center; gap: 10px; font-size: 1.1rem; font-weight: bold; width: 100%; text-align: center;}
-        .revealed .q-mark { display: none; }
-        .revealed .answer-content { display: flex; animation: fadeIn 0.3s; }
-
-        @keyframes fadeIn { from {opacity:0; transform:translateY(5px);} to {opacity:1; transform:translateY(0);} }
+        .answer-content { display: none; align-items: center; gap: 10px; font-size: 1.2rem; font-weight: bold; }
+        .guess-card.revealed .q-mark { display: none; }
+        .guess-card.revealed .answer-content { display: flex; }
 
         /* --- 3. Practice --- */
         .top-bar {
-            background: var(--accent-blue); color: white; width: 100%; padding: 15px 10px;
-            border-radius: 15px; text-align: center; font-size: 1.5rem; font-weight: bold;
-            margin-bottom: 15px; box-shadow: 0 5px 0 #1976D2;
-            flex-shrink: 0;
+            background: var(--accent-blue); color: white; width: 100%; padding: 15px;
+            border-radius: 15px; text-align: center; font-size: 1.6rem; font-weight: bold;
+            margin-bottom: 15px;
         }
-        .grid-container { flex: 1; width: 100%; overflow-y: auto; padding: 5px; }
-        .colorful-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); 
-            gap: 10px; 
-            padding-bottom: 20px;
+        .colorful-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 手機兩列 */
+            gap: 10px; width: 100%;
         }
         .vocab-card {
             background: white; border: 3px solid #eee; border-radius: 15px;
-            padding: 15px 5px; cursor: pointer; text-align: center; transition: all 0.1s;
+            padding: 15px 5px; text-align: center; cursor: pointer;
         }
-        .vocab-card:nth-child(3n+1) { border-color: #FFAB91; }
-        .vocab-card:nth-child(3n+2) { border-color: #81D4FA; }
-        .vocab-card:nth-child(3n+3) { border-color: #A5D6A7; }
-        .vocab-card:active { transform: scale(0.95); background: #FFFDE7; }
-        .v-icon { font-size: 2.2rem; }
-        .v-text { font-size: 1rem; font-weight: 700; color: #555; margin-top: 5px;}
+        .vocab-card:active { background: #FFFDE7; transform: scale(0.98); }
+        .v-icon { font-size: 2.5rem; display: block; }
+        .v-text { font-size: 1.1rem; font-weight: 700; color: #555; margin-top: 5px; display: block;}
 
         /* --- 4. Production --- */
         .spin-wrapper {
-            flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            width: 100%; background: #F3E5F5; border-radius: 20px;
-            padding: 20px;
+            width: 100%; background: #F3E5F5; border-radius: 20px; padding: 30px 10px;
+            display: flex; flex-direction: column; align-items: center;
         }
-        .big-emoji { font-size: clamp(4rem, 15vw, 8rem); margin-bottom: 10px; animation: bounce 2s infinite; }
-        .big-text { font-size: clamp(1.5rem, 6vw, 3rem); color: #8E24AA; font-weight: 800; text-align: center; }
+        .big-emoji { font-size: 6rem; margin-bottom: 10px; }
+        .big-text { font-size: 2rem; color: #8E24AA; font-weight: 800; margin-bottom: 20px; text-align: center; }
         .spin-btn {
-            margin-top: 20px; background: #EC407A; color: white; border: none;
-            padding: 15px 40px; font-size: 1.5rem; border-radius: 50px; font-family: inherit; font-weight: 700;
-            cursor: pointer; box-shadow: 0 6px 0 #C2185B; transition: 0.1s;
-            max-width: 80%;
+            background: #EC407A; color: white; border: none;
+            padding: 15px 50px; font-size: 1.5rem; border-radius: 50px; font-weight: 700;
+            box-shadow: 0 5px 0 #C2185B; cursor: pointer;
         }
-        .spin-btn:active { transform: translateY(5px); box-shadow: 0 0 0; }
+        .spin-btn:active { transform: translateY(4px); box-shadow: none; }
 
         /* --- 5. Conclusion --- */
-        .conclusion-box { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; width: 100%; }
-        .q-large { font-size: clamp(1.2rem, 4vw, 2rem); color: #37474F; font-weight: 700; margin-bottom: 20px; line-height: 1.4; }
-        .ans-wrapper { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
+        .conclusion-box { text-align: center; width: 100%; padding: 20px 0; }
+        .q-large { font-size: 1.5rem; color: #37474F; font-weight: 700; margin-bottom: 20px; }
+        .ans-wrapper { display: flex; gap: 20px; justify-content: center; margin-bottom: 20px; }
         .btn-choice {
-            padding: 12px 25px; font-size: 1.2rem; border: none; border-radius: 15px;
-            font-family: inherit; font-weight: 700; cursor: pointer; color: white;
-            box-shadow: 0 5px 0 rgba(0,0,0,0.2); transition: 0.1s;
+            padding: 12px 30px; font-size: 1.2rem; border: none; border-radius: 15px;
+            font-weight: 700; color: white; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.2);
         }
         .btn-yes { background: #EF5350; }
         .btn-no { background: #66BB6A; }
-        .btn-choice:active { transform: translateY(5px); box-shadow: none; }
         .final-reveal {
-            display: none; background: #FFF; border: 5px solid #66BB6A; padding: 15px; border-radius: 20px;
-            margin-top: 20px; animation: popIn 0.5s; width: 90%; max-width: 400px;
+            display: none; background: #FFF; border: 5px solid #66BB6A; padding: 20px;
+            border-radius: 20px; animation: popIn 0.5s;
         }
 
-        /* --- !!! 重點：RWD 媒體查詢 (針對手機螢幕) !!! --- */
-        @media (max-width: 768px) {
-            /* 導航列 */
-            .nav-btn { padding: 6px 12px; font-size: 0.85rem; }
-            
-            /* Warmup: 卡片上下堆疊 */
-            .warmup-box { flex-direction: column; gap: 15px; }
-            .animal-card { width: 70%; max-width: 250px; height: auto; aspect-ratio: 3/4; }
-
-            /* Review: 貓與鳥左右欄變為上下欄 */
-            .review-wrapper { flex-direction: column; overflow-y: auto; }
-            .review-col { width: 100%; min-height: 300px; flex-shrink: 0; }
-            .guess-grid { overflow-y: visible; } /* 手機版讓外層滾動，內層展開 */
-
-            /* Practice */
-            .colorful-grid { grid-template-columns: repeat(2, 1fr); }
-
-            /* Production */
-            .spin-btn { width: 80%; padding: 12px; }
+        /* --- 針對大螢幕 (平板/電腦) 的優化 --- */
+        @media (min-width: 768px) {
+            .review-wrapper { flex-direction: row; } /* 電腦版並排 */
+            .colorful-grid { grid-template-columns: repeat(4, 1fr); } /* 電腦版四列 */
+            .animal-card { width: 220px; height: 300px; } /* 電腦版卡片大一點 */
         }
 
     </style>
@@ -281,24 +236,23 @@
 
     <!-- 1. Warm Up -->
     <div id="warmup" class="container show">
-        <h2>Who is it? (Click Sound)</h2>
+        <h2>Who is it? (Tap to Reveal)</h2>
         <div class="warmup-box">
-            <div class="animal-card" onclick="reveal(this, 'Cat')">
+            <div class="animal-card" onclick="reveal(this)">
                 <div class="silhouette">🐈‍⬛</div>
-                <div class="sound-badge" onclick="event.stopPropagation(); playAudio('Meow meow')">🔊 Sound 1</div>
+                <div class="sound-badge" onclick="event.stopPropagation(); playAudio('Meow meow')">🔊 Meow</div>
             </div>
-            <div class="animal-card bird" onclick="reveal(this, 'Bird')">
+            <div class="animal-card bird" onclick="reveal(this)">
                 <div class="silhouette">🕊️</div>
-                <div class="sound-badge" onclick="event.stopPropagation(); playAudio('Tweet tweet')">🔊 Sound 2</div>
+                <div class="sound-badge" onclick="event.stopPropagation(); playAudio('Tweet tweet')">🔊 Tweet</div>
             </div>
         </div>
     </div>
 
-    <!-- 2. Review (Guessing Game) -->
+    <!-- 2. Review -->
     <div id="review" class="container">
-        <h2>Guess! What do they like?</h2>
+        <h2>What do they like?</h2>
         <div class="review-wrapper">
-            <!-- Cat Guessing -->
             <div class="review-col col-cat">
                 <div class="review-header">🐈‍⬛ Cat Likes...</div>
                 <div class="guess-grid">
@@ -314,13 +268,8 @@
                         <span class="q-mark">???</span>
                         <div class="answer-content"><span>🚗</span> cars</div>
                     </div>
-                    <div class="guess-card" onclick="revealCard(this, 'The Cat likes sleeping')">
-                        <span class="q-mark">???</span>
-                        <div class="answer-content"><span>😴</span> sleeping</div>
-                    </div>
                 </div>
             </div>
-            <!-- Bird Guessing -->
             <div class="review-col col-bird">
                 <div class="review-header">🕊️ Bird Likes...</div>
                 <div class="guess-grid">
@@ -336,10 +285,6 @@
                         <span class="q-mark">???</span>
                         <div class="answer-content"><span>🎤</span> singing</div>
                     </div>
-                    <div class="guess-card" onclick="revealCard(this, 'The Bird likes flying')">
-                        <span class="q-mark">???</span>
-                        <div class="answer-content"><span>🦅</span> flying</div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -350,24 +295,15 @@
         <div class="top-bar">
             I like <span id="target-word" style="color:#FFEB3B; text-decoration:underline;">________</span>.
         </div>
-        <div class="grid-container">
-            <div class="colorful-grid">
-                <div class="vocab-card" onclick="setWord('painting', '🎨')"><div class="v-icon">🎨</div><div class="v-text">painting</div></div>
-                <div class="vocab-card" onclick="setWord('flying', '🦅')"><div class="v-icon">🦅</div><div class="v-text">flying</div></div>
-                <div class="vocab-card" onclick="setWord('stretching', '🙆')"><div class="v-icon">🙆</div><div class="v-text">stretching</div></div>
-                <div class="vocab-card" onclick="setWord('cleaning', '👅')"><div class="v-icon">👅</div><div class="v-text">cleaning</div></div>
-                <div class="vocab-card" onclick="setWord('pizza', '🍕')"><div class="v-icon">🍕</div><div class="v-text">pizza</div></div>
-                <div class="vocab-card" onclick="setWord('dancing', '💃')"><div class="v-icon">💃</div><div class="v-text">dancing</div></div>
-                <div class="vocab-card" onclick="setWord('swimming', '🏊')"><div class="v-icon">🏊</div><div class="v-text">swimming</div></div>
-                <div class="vocab-card" onclick="setWord('reading', '📖')"><div class="v-icon">📖</div><div class="v-text">reading</div></div>
-                <div class="vocab-card" onclick="setWord('sleeping', '😴')"><div class="v-icon">😴</div><div class="v-text">sleeping</div></div>
-                <div class="vocab-card" onclick="setWord('ice cream', '🍦')"><div class="v-icon">🍦</div><div class="v-text">ice cream</div></div>
-                <div class="vocab-card" onclick="setWord('running', '🏃')"><div class="v-icon">🏃</div><div class="v-text">running</div></div>
-                <div class="vocab-card" onclick="setWord('music', '🎵')"><div class="v-icon">🎵</div><div class="v-text">music</div></div>
-                <div class="vocab-card" onclick="setWord('hiding', '🫣')"><div class="v-icon">🫣</div><div class="v-text">hiding</div></div>
-                <div class="vocab-card" onclick="setWord('the box', '📦')"><div class="v-icon">📦</div><div class="v-text">the box</div></div>
-                <div class="vocab-card" onclick="setWord('worms', '🐛')"><div class="v-icon">🐛</div><div class="v-text">worms</div></div>
-            </div>
+        <div class="colorful-grid">
+            <div class="vocab-card" onclick="setWord('painting', '🎨')"><span class="v-icon">🎨</span><span class="v-text">painting</span></div>
+            <div class="vocab-card" onclick="setWord('flying', '🦅')"><span class="v-icon">🦅</span><span class="v-text">flying</span></div>
+            <div class="vocab-card" onclick="setWord('pizza', '🍕')"><span class="v-icon">🍕</span><span class="v-text">pizza</span></div>
+            <div class="vocab-card" onclick="setWord('dancing', '💃')"><span class="v-icon">💃</span><span class="v-text">dancing</span></div>
+            <div class="vocab-card" onclick="setWord('swimming', '🏊')"><span class="v-icon">🏊</span><span class="v-text">swimming</span></div>
+            <div class="vocab-card" onclick="setWord('reading', '📖')"><span class="v-icon">📖</span><span class="v-text">reading</span></div>
+            <div class="vocab-card" onclick="setWord('sleeping', '😴')"><span class="v-icon">😴</span><span class="v-text">sleeping</span></div>
+            <div class="vocab-card" onclick="setWord('running', '🏃')"><span class="v-icon">🏃</span><span class="v-text">running</span></div>
         </div>
     </div>
 
@@ -391,15 +327,15 @@
                 <button class="btn-choice btn-no" onclick="finish()">No!</button>
             </div>
             <div id="final" class="final-reveal">
-                <div style="font-size:clamp(3rem, 10vw, 5rem);">🐈‍⬛ ❤️ 🕊️</div>
-                <div style="font-size:1.5rem; color:#2E7D32; font-weight:bold;">Correct!</div>
+                <div style="font-size:4rem;">🐈‍⬛ ❤️ 🕊️</div>
+                <div style="font-size:1.5rem; color:#2E7D32; font-weight:bold; margin:10px 0;">Correct!</div>
                 <div style="font-size:1.2rem;">We both like <b>Painting!</b></div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- TTS 音效 ---
+        // TTS 音效
         function playAudio(text) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -409,61 +345,54 @@
             }
         }
 
-        // --- 頁面切換 ---
+        // 切換分頁 (自動滾動回頂端)
         function switchTab(id) {
             document.querySelectorAll('.container').forEach(e => e.classList.remove('show'));
             document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
             document.getElementById(id).classList.add('show');
             
+            // 更新按鈕狀態
             const tabs = ['warmup', 'review', 'practice', 'production', 'conclusion'];
-            const index = tabs.indexOf(id);
-            if(index !== -1) {
-                document.querySelectorAll('.nav-btn')[index].classList.add('active');
-                // 手機版：切換時自動滾動導航列讓按鈕可見
-                const btn = document.querySelectorAll('.nav-btn')[index];
-                btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-            }
+            const btn = document.querySelectorAll('.nav-btn')[tabs.indexOf(id)];
+            btn.classList.add('active');
+            
+            // 手機友善：切換分頁時，讓按鈕滾動到中間
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            
+            // 稍微往下滾一點，讓使用者看到內容變化
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // --- Warmup ---
-        function reveal(el, name) {
-            el.classList.add('revealed');
-        }
+        function reveal(el) { el.classList.add('revealed'); }
 
-        // --- Review (Guessing Game) ---
         function revealCard(el, sentence) {
-            if (el.classList.contains('revealed')) {
-                playAudio(sentence); 
-                return;
+            if (!el.classList.contains('revealed')) {
+                el.classList.add('revealed');
             }
-            el.classList.add('revealed'); 
-            playAudio(sentence); 
+            playAudio(sentence);
         }
 
-        // --- Practice ---
         function setWord(w, i) {
             document.getElementById('target-word').innerText = w;
             playAudio("I like " + w);
         }
 
-        // --- Production ---
+        let spinning = false;
         const items = [
             {t:"I like flying!", i:"🦅"}, {t:"I like painting!", i:"🎨"},
             {t:"I like running!", i:"🏃"}, {t:"I like dancing!", i:"💃"},
             {t:"I like sleeping!", i:"😴"}
         ];
-        let spinning = false;
         function spin() {
             if(spinning) return; spinning = true;
             const icon = document.getElementById('game-icon');
             const text = document.getElementById('game-text');
-            let c = 0;
-            playAudio("Go!");
+            let c = 0; playAudio("Go!");
             const t = setInterval(() => {
                 const r = items[Math.floor(Math.random()*items.length)];
-                icon.innerText = r.i; text.innerText = "I like...";
+                icon.innerText = r.i; text.innerText = "Spinning...";
                 c++;
-                if(c>15) {
+                if(c>12) {
                     clearInterval(t); spinning = false;
                     const f = items[Math.floor(Math.random()*items.length)];
                     icon.innerText = f.i; text.innerText = f.t;
@@ -472,7 +401,6 @@
             }, 80);
         }
 
-        // --- Conclusion ---
         function finish() {
             document.getElementById('q-btns').style.display = 'none';
             document.getElementById('final').style.display = 'block';

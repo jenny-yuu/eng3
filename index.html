@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Can Cat and Bird Be Friends?</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -16,7 +16,7 @@
             --text-color: #37474F;
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: 'Fredoka', sans-serif;
@@ -24,8 +24,9 @@
             background-image: radial-gradient(#FFE082 2px, transparent 2px);
             background-size: 30px 30px;
             margin: 0;
-            height: 100vh; /* 鎖定高度 */
-            overflow: hidden; /* 禁止滾動 */
+            /* 改用 dvh (Dynamic Viewport Height) 解決手機瀏覽器網址列遮擋問題 */
+            height: 100dvh; 
+            overflow: hidden; 
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -34,29 +35,45 @@
         }
 
         h1 {
-            font-size: 2.2rem;
+            font-size: clamp(1.5rem, 5vw, 2.2rem); /* 字體大小隨螢幕縮放 */
             margin: 5px 0 10px 0;
             color: #E65100;
             text-shadow: 2px 2px white;
             font-weight: 700;
+            text-align: center;
+            line-height: 1.2;
         }
 
         /* --- 導航列 --- */
         .nav-bar {
-            display: flex; gap: 10px; margin-bottom: 10px;
-            background: white; padding: 8px 15px; border-radius: 50px;
+            display: flex; 
+            gap: 8px; 
+            margin-bottom: 10px;
+            background: white; 
+            padding: 8px; 
+            border-radius: 50px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            max-width: 100%;
+            overflow-x: auto; /* 允許在極小螢幕橫向滑動 */
+            white-space: nowrap;
+            /* 隱藏滾動條 */
+            -ms-overflow-style: none; 
+            scrollbar-width: none;
         }
+        .nav-bar::-webkit-scrollbar { display: none; }
+
         .nav-btn {
             border: none; background: #F5F5F5; color: #777;
-            font-family: inherit; font-size: 1rem; font-weight: 600;
-            padding: 8px 20px; border-radius: 25px; cursor: pointer;
+            font-family: inherit; font-size: 0.9rem; font-weight: 600;
+            padding: 8px 16px; border-radius: 25px; cursor: pointer;
             transition: all 0.2s;
+            flex-shrink: 0; /* 防止按鈕被擠壓變形 */
         }
         .nav-btn.active {
             background: var(--accent-blue); color: white;
             transform: scale(1.05); box-shadow: 0 3px 10px rgba(66, 165, 245, 0.4);
         }
+        /* 按鈕顏色維持原樣 */
         .nav-btn:nth-child(1).active { background: #FFA726; }
         .nav-btn:nth-child(2).active { background: #AB47BC; }
         .nav-btn:nth-child(3).active { background: #26C6DA; }
@@ -67,64 +84,103 @@
         .container {
             display: none;
             background: white;
-            width: 95%;
-            height: 85vh;
+            width: 100%;
+            max-width: 1000px; /* 限制在大螢幕上的最大寬度 */
+            flex: 1; /* 佔滿剩餘高度 */
             border-radius: 25px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             border: 5px solid white;
-            padding: 20px;
+            padding: 15px;
             flex-direction: column;
             align-items: center;
             position: relative;
+            overflow-y: auto; /* 讓內容過長時容器內部可以滾動 */
+            overflow-x: hidden;
         }
         .container.show { display: flex; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-        h2 { margin: 0 0 15px 0; font-size: 1.8rem; color: #EC407A; border-bottom: 3px dashed #eee; width: 100%; text-align: center; padding-bottom: 5px;}
+        h2 { 
+            margin: 0 0 15px 0; 
+            font-size: 1.5rem; 
+            color: #EC407A; 
+            border-bottom: 3px dashed #eee; 
+            width: 100%; 
+            text-align: center; 
+            padding-bottom: 5px;
+            flex-shrink: 0; /* 防止標題被壓縮 */
+        }
 
         /* --- 1. Warm-up --- */
-        .warmup-box { display: flex; gap: 30px; height: 100%; align-items: center; }
+        .warmup-box { 
+            display: flex; 
+            gap: 20px; 
+            height: 100%; 
+            width: 100%;
+            align-items: center; 
+            justify-content: center;
+        }
         .animal-card {
-            width: 250px; height: 320px; background: #FFF3E0; border: 4px solid #FFB74D; border-radius: 20px;
+            width: 250px; 
+            max-width: 45%; /* 手機上避免超出 */
+            height: 320px; 
+            max-height: 60vh; /* 手機橫放時避免過高 */
+            background: #FFF3E0; 
+            border: 4px solid #FFB74D; 
+            border-radius: 20px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             cursor: pointer; transition: transform 0.2s;
+            padding: 10px;
         }
         .animal-card.bird { background: #E3F2FD; border-color: #64B5F6; }
-        .animal-card:hover { transform: translateY(-10px); }
-        .silhouette { font-size: 8rem; filter: brightness(0) opacity(0.2); transition: 0.5s; }
+        .animal-card:hover { transform: translateY(-5px); }
+        .silhouette { font-size: clamp(4rem, 10vw, 8rem); filter: brightness(0) opacity(0.2); transition: 0.5s; }
         .animal-card.revealed .silhouette { filter: none; opacity: 1; transform: scale(1.1); }
-        .sound-badge { margin-top: 15px; background: white; padding: 5px 15px; border-radius: 15px; font-weight: bold; color: #555; box-shadow: 0 3px 0 #ddd; }
+        .sound-badge { margin-top: 15px; background: white; padding: 5px 10px; border-radius: 15px; font-weight: bold; color: #555; box-shadow: 0 3px 0 #ddd; font-size: 0.9rem;}
 
         /* --- 2. Review (Guessing Game Style) --- */
-        .review-wrapper { display: flex; width: 100%; height: 100%; gap: 20px; }
+        .review-wrapper { 
+            display: flex; 
+            width: 100%; 
+            height: 100%; 
+            gap: 15px; 
+        }
         .review-col {
-            flex: 1; border-radius: 20px; padding: 15px;
+            flex: 1; border-radius: 20px; padding: 10px;
             display: flex; flex-direction: column; align-items: center;
+            overflow: hidden; /* 防止內部溢出 */
         }
         .col-cat { background: var(--cat-bg); border: 3px solid #FFD54F; }
         .col-bird { background: var(--bird-bg); border: 3px solid #4FC3F7; }
-        .review-header { font-size: 1.8rem; font-weight: 700; margin-bottom: 15px; }
+        .review-header { font-size: 1.3rem; font-weight: 700; margin-bottom: 10px; text-align: center; }
         
-        .guess-grid { width: 100%; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+        .guess-grid { 
+            width: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            overflow-y: auto; /* 讓列表可以獨立滾動 */
+            padding-bottom: 10px;
+            flex: 1; /* 填滿剩餘空間 */
+        }
         
         .guess-card {
-            background: #CFD8DC; /* 未揭曉時是灰色 */
+            background: #CFD8DC; 
             border: 3px dashed #B0BEC5;
-            padding: 15px; border-radius: 15px; cursor: pointer;
+            padding: 10px; border-radius: 15px; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            transition: all 0.3s; min-height: 70px;
+            transition: all 0.3s; min-height: 60px; flex-shrink: 0;
         }
         .guess-card:hover { transform: scale(1.02); background: #B0BEC5; }
-        
         .guess-card.revealed {
-            background: white; border: 3px solid; transform: scale(1.05);
-            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            background: white; border: 3px solid; transform: scale(1);
+            box-shadow: 0 3px 5px rgba(0,0,0,0.1);
         }
         .col-cat .guess-card.revealed { border-color: #FFD54F; }
         .col-bird .guess-card.revealed { border-color: #4FC3F7; }
 
-        .q-mark { font-size: 2rem; font-weight: 900; color: #607D8B; }
-        .answer-content { display: none; align-items: center; gap: 15px; font-size: 1.4rem; font-weight: bold; width: 100%; }
+        .q-mark { font-size: 1.5rem; font-weight: 900; color: #607D8B; }
+        .answer-content { display: none; align-items: center; justify-content: center; gap: 10px; font-size: 1.1rem; font-weight: bold; width: 100%; text-align: center;}
         .revealed .q-mark { display: none; }
         .revealed .answer-content { display: flex; animation: fadeIn 0.3s; }
 
@@ -132,43 +188,51 @@
 
         /* --- 3. Practice --- */
         .top-bar {
-            background: var(--accent-blue); color: white; width: 100%; padding: 10px;
-            border-radius: 15px; text-align: center; font-size: 2.2rem; font-weight: bold;
+            background: var(--accent-blue); color: white; width: 100%; padding: 15px 10px;
+            border-radius: 15px; text-align: center; font-size: 1.5rem; font-weight: bold;
             margin-bottom: 15px; box-shadow: 0 5px 0 #1976D2;
+            flex-shrink: 0;
         }
         .grid-container { flex: 1; width: 100%; overflow-y: auto; padding: 5px; }
-        .colorful-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+        .colorful-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); 
+            gap: 10px; 
+            padding-bottom: 20px;
+        }
         .vocab-card {
             background: white; border: 3px solid #eee; border-radius: 15px;
-            padding: 10px 5px; cursor: pointer; text-align: center; transition: all 0.1s;
+            padding: 15px 5px; cursor: pointer; text-align: center; transition: all 0.1s;
         }
         .vocab-card:nth-child(3n+1) { border-color: #FFAB91; }
         .vocab-card:nth-child(3n+2) { border-color: #81D4FA; }
         .vocab-card:nth-child(3n+3) { border-color: #A5D6A7; }
-        .vocab-card:hover { transform: scale(1.05); background: #FFFDE7; }
-        .v-icon { font-size: 2.5rem; }
-        .v-text { font-size: 1.2rem; font-weight: 700; color: #555; }
+        .vocab-card:active { transform: scale(0.95); background: #FFFDE7; }
+        .v-icon { font-size: 2.2rem; }
+        .v-text { font-size: 1rem; font-weight: 700; color: #555; margin-top: 5px;}
 
         /* --- 4. Production --- */
         .spin-wrapper {
             flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
             width: 100%; background: #F3E5F5; border-radius: 20px;
+            padding: 20px;
         }
-        .big-emoji { font-size: 8rem; margin-bottom: 10px; animation: bounce 2s infinite; }
-        .big-text { font-size: 3rem; color: #8E24AA; font-weight: 800; }
+        .big-emoji { font-size: clamp(4rem, 15vw, 8rem); margin-bottom: 10px; animation: bounce 2s infinite; }
+        .big-text { font-size: clamp(1.5rem, 6vw, 3rem); color: #8E24AA; font-weight: 800; text-align: center; }
         .spin-btn {
             margin-top: 20px; background: #EC407A; color: white; border: none;
-            padding: 15px 60px; font-size: 2rem; border-radius: 50px; font-family: inherit; font-weight: 700;
-            cursor: pointer; box-shadow: 0 8px 0 #C2185B; transition: 0.1s;
+            padding: 15px 40px; font-size: 1.5rem; border-radius: 50px; font-family: inherit; font-weight: 700;
+            cursor: pointer; box-shadow: 0 6px 0 #C2185B; transition: 0.1s;
+            max-width: 80%;
         }
         .spin-btn:active { transform: translateY(5px); box-shadow: 0 0 0; }
 
         /* --- 5. Conclusion --- */
-        .conclusion-box { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        .q-large { font-size: 2rem; color: #37474F; font-weight: 700; margin-bottom: 30px; }
-        .ans-wrapper { display: flex; gap: 20px; }
+        .conclusion-box { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; width: 100%; }
+        .q-large { font-size: clamp(1.2rem, 4vw, 2rem); color: #37474F; font-weight: 700; margin-bottom: 20px; line-height: 1.4; }
+        .ans-wrapper { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
         .btn-choice {
-            padding: 15px 30px; font-size: 1.5rem; border: none; border-radius: 15px;
+            padding: 12px 25px; font-size: 1.2rem; border: none; border-radius: 15px;
             font-family: inherit; font-weight: 700; cursor: pointer; color: white;
             box-shadow: 0 5px 0 rgba(0,0,0,0.2); transition: 0.1s;
         }
@@ -176,8 +240,29 @@
         .btn-no { background: #66BB6A; }
         .btn-choice:active { transform: translateY(5px); box-shadow: none; }
         .final-reveal {
-            display: none; background: #FFF; border: 5px solid #66BB6A; padding: 20px; border-radius: 20px;
-            margin-top: 20px; animation: popIn 0.5s;
+            display: none; background: #FFF; border: 5px solid #66BB6A; padding: 15px; border-radius: 20px;
+            margin-top: 20px; animation: popIn 0.5s; width: 90%; max-width: 400px;
+        }
+
+        /* --- !!! 重點：RWD 媒體查詢 (針對手機螢幕) !!! --- */
+        @media (max-width: 768px) {
+            /* 導航列 */
+            .nav-btn { padding: 6px 12px; font-size: 0.85rem; }
+            
+            /* Warmup: 卡片上下堆疊 */
+            .warmup-box { flex-direction: column; gap: 15px; }
+            .animal-card { width: 70%; max-width: 250px; height: auto; aspect-ratio: 3/4; }
+
+            /* Review: 貓與鳥左右欄變為上下欄 */
+            .review-wrapper { flex-direction: column; overflow-y: auto; }
+            .review-col { width: 100%; min-height: 300px; flex-shrink: 0; }
+            .guess-grid { overflow-y: visible; } /* 手機版讓外層滾動，內層展開 */
+
+            /* Practice */
+            .colorful-grid { grid-template-columns: repeat(2, 1fr); }
+
+            /* Production */
+            .spin-btn { width: 80%; padding: 12px; }
         }
 
     </style>
@@ -306,9 +391,9 @@
                 <button class="btn-choice btn-no" onclick="finish()">No!</button>
             </div>
             <div id="final" class="final-reveal">
-                <div style="font-size:5rem;">🐈‍⬛ ❤️ 🕊️</div>
-                <div style="font-size:2rem; color:#2E7D32; font-weight:bold;">Correct!</div>
-                <div style="font-size:1.5rem;">We both like <b>Painting!</b></div>
+                <div style="font-size:clamp(3rem, 10vw, 5rem);">🐈‍⬛ ❤️ 🕊️</div>
+                <div style="font-size:1.5rem; color:#2E7D32; font-weight:bold;">Correct!</div>
+                <div style="font-size:1.2rem;">We both like <b>Painting!</b></div>
             </div>
         </div>
     </div>
@@ -331,7 +416,13 @@
             document.getElementById(id).classList.add('show');
             
             const tabs = ['warmup', 'review', 'practice', 'production', 'conclusion'];
-            document.querySelectorAll('.nav-btn')[tabs.indexOf(id)].classList.add('active');
+            const index = tabs.indexOf(id);
+            if(index !== -1) {
+                document.querySelectorAll('.nav-btn')[index].classList.add('active');
+                // 手機版：切換時自動滾動導航列讓按鈕可見
+                const btn = document.querySelectorAll('.nav-btn')[index];
+                btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
         }
 
         // --- Warmup ---
@@ -342,11 +433,11 @@
         // --- Review (Guessing Game) ---
         function revealCard(el, sentence) {
             if (el.classList.contains('revealed')) {
-                playAudio(sentence); // 已經開過的，點擊只發音
+                playAudio(sentence); 
                 return;
             }
-            el.classList.add('revealed'); // 翻開卡片
-            playAudio(sentence); // 朗讀句子
+            el.classList.add('revealed'); 
+            playAudio(sentence); 
         }
 
         // --- Practice ---

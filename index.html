@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Can Cat and Bird Be Friends?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- 視覺系統：繽紛糖果色 --- */
+        :root {
+            --bg-color: #FFF9C4;
+            --cat-bg: #FFF8E1;
+            --bird-bg: #E1F5FE;
+            --btn-color: #FF7043;
+            --accent-blue: #42A5F5;
+            --text-color: #37474F;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#FFE082 2px, transparent 2px);
+            background-size: 30px 30px;
+            margin: 0;
+            height: 100vh; /* 鎖定高度 */
+            overflow: hidden; /* 禁止滾動 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            color: var(--text-color);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin: 5px 0 10px 0;
+            color: #E65100;
+            text-shadow: 2px 2px white;
+            font-weight: 700;
+        }
+
+        /* --- 導航列 --- */
+        .nav-bar {
+            display: flex; gap: 10px; margin-bottom: 10px;
+            background: white; padding: 8px 15px; border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .nav-btn {
+            border: none; background: #F5F5F5; color: #777;
+            font-family: inherit; font-size: 1rem; font-weight: 600;
+            padding: 8px 20px; border-radius: 25px; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-btn.active {
+            background: var(--accent-blue); color: white;
+            transform: scale(1.05); box-shadow: 0 3px 10px rgba(66, 165, 245, 0.4);
+        }
+        .nav-btn:nth-child(1).active { background: #FFA726; }
+        .nav-btn:nth-child(2).active { background: #AB47BC; }
+        .nav-btn:nth-child(3).active { background: #26C6DA; }
+        .nav-btn:nth-child(4).active { background: #EF5350; }
+        .nav-btn:nth-child(5).active { background: #66BB6A; }
+
+        /* --- 主容器 --- */
+        .container {
+            display: none;
+            background: white;
+            width: 95%;
+            height: 85vh;
+            border-radius: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border: 5px solid white;
+            padding: 20px;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .container.show { display: flex; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        h2 { margin: 0 0 15px 0; font-size: 1.8rem; color: #EC407A; border-bottom: 3px dashed #eee; width: 100%; text-align: center; padding-bottom: 5px;}
+
+        /* --- 1. Warm-up --- */
+        .warmup-box { display: flex; gap: 30px; height: 100%; align-items: center; }
+        .animal-card {
+            width: 250px; height: 320px; background: #FFF3E0; border: 4px solid #FFB74D; border-radius: 20px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .animal-card.bird { background: #E3F2FD; border-color: #64B5F6; }
+        .animal-card:hover { transform: translateY(-10px); }
+        .silhouette { font-size: 8rem; filter: brightness(0) opacity(0.2); transition: 0.5s; }
+        .animal-card.revealed .silhouette { filter: none; opacity: 1; transform: scale(1.1); }
+        .sound-badge { margin-top: 15px; background: white; padding: 5px 15px; border-radius: 15px; font-weight: bold; color: #555; box-shadow: 0 3px 0 #ddd; }
+
+        /* --- 2. Review (Guessing Game Style) --- */
+        .review-wrapper { display: flex; width: 100%; height: 100%; gap: 20px; }
+        .review-col {
+            flex: 1; border-radius: 20px; padding: 15px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .col-cat { background: var(--cat-bg); border: 3px solid #FFD54F; }
+        .col-bird { background: var(--bird-bg); border: 3px solid #4FC3F7; }
+        .review-header { font-size: 1.8rem; font-weight: 700; margin-bottom: 15px; }
+        
+        .guess-grid { width: 100%; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+        
+        .guess-card {
+            background: #CFD8DC; /* 未揭曉時是灰色 */
+            border: 3px dashed #B0BEC5;
+            padding: 15px; border-radius: 15px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s; min-height: 70px;
+        }
+        .guess-card:hover { transform: scale(1.02); background: #B0BEC5; }
+        
+        .guess-card.revealed {
+            background: white; border: 3px solid; transform: scale(1.05);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        .col-cat .guess-card.revealed { border-color: #FFD54F; }
+        .col-bird .guess-card.revealed { border-color: #4FC3F7; }
+
+        .q-mark { font-size: 2rem; font-weight: 900; color: #607D8B; }
+        .answer-content { display: none; align-items: center; gap: 15px; font-size: 1.4rem; font-weight: bold; width: 100%; }
+        .revealed .q-mark { display: none; }
+        .revealed .answer-content { display: flex; animation: fadeIn 0.3s; }
+
+        @keyframes fadeIn { from {opacity:0; transform:translateY(5px);} to {opacity:1; transform:translateY(0);} }
+
+        /* --- 3. Practice --- */
+        .top-bar {
+            background: var(--accent-blue); color: white; width: 100%; padding: 10px;
+            border-radius: 15px; text-align: center; font-size: 2.2rem; font-weight: bold;
+            margin-bottom: 15px; box-shadow: 0 5px 0 #1976D2;
+        }
+        .grid-container { flex: 1; width: 100%; overflow-y: auto; padding: 5px; }
+        .colorful-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+        .vocab-card {
+            background: white; border: 3px solid #eee; border-radius: 15px;
+            padding: 10px 5px; cursor: pointer; text-align: center; transition: all 0.1s;
+        }
+        .vocab-card:nth-child(3n+1) { border-color: #FFAB91; }
+        .vocab-card:nth-child(3n+2) { border-color: #81D4FA; }
+        .vocab-card:nth-child(3n+3) { border-color: #A5D6A7; }
+        .vocab-card:hover { transform: scale(1.05); background: #FFFDE7; }
+        .v-icon { font-size: 2.5rem; }
+        .v-text { font-size: 1.2rem; font-weight: 700; color: #555; }
+
+        /* --- 4. Production --- */
+        .spin-wrapper {
+            flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            width: 100%; background: #F3E5F5; border-radius: 20px;
+        }
+        .big-emoji { font-size: 8rem; margin-bottom: 10px; animation: bounce 2s infinite; }
+        .big-text { font-size: 3rem; color: #8E24AA; font-weight: 800; }
+        .spin-btn {
+            margin-top: 20px; background: #EC407A; color: white; border: none;
+            padding: 15px 60px; font-size: 2rem; border-radius: 50px; font-family: inherit; font-weight: 700;
+            cursor: pointer; box-shadow: 0 8px 0 #C2185B; transition: 0.1s;
+        }
+        .spin-btn:active { transform: translateY(5px); box-shadow: 0 0 0; }
+
+        /* --- 5. Conclusion --- */
+        .conclusion-box { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .q-large { font-size: 2rem; color: #37474F; font-weight: 700; margin-bottom: 30px; }
+        .ans-wrapper { display: flex; gap: 20px; }
+        .btn-choice {
+            padding: 15px 30px; font-size: 1.5rem; border: none; border-radius: 15px;
+            font-family: inherit; font-weight: 700; cursor: pointer; color: white;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.2); transition: 0.1s;
+        }
+        .btn-yes { background: #EF5350; }
+        .btn-no { background: #66BB6A; }
+        .btn-choice:active { transform: translateY(5px); box-shadow: none; }
+        .final-reveal {
+            display: none; background: #FFF; border: 5px solid #66BB6A; padding: 20px; border-radius: 20px;
+            margin-top: 20px; animation: popIn 0.5s;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Can Cat & Bird Be Friends?</h1>
+
+    <div class="nav-bar">
+        <button class="nav-btn active" onclick="switchTab('warmup')">1. Warm Up</button>
+        <button class="nav-btn" onclick="switchTab('review')">2. Guessing</button>
+        <button class="nav-btn" onclick="switchTab('practice')">3. Practice</button>
+        <button class="nav-btn" onclick="switchTab('production')">4. Game</button>
+        <button class="nav-btn" onclick="switchTab('conclusion')">5. Conclusion</button>
+    </div>
+
+    <!-- 1. Warm Up -->
+    <div id="warmup" class="container show">
+        <h2>Who is it? (Click Sound)</h2>
+        <div class="warmup-box">
+            <div class="animal-card" onclick="reveal(this, 'Cat')">
+                <div class="silhouette">🐈‍⬛</div>
+                <div class="sound-badge" onclick="event.stopPropagation(); playAudio('Meow meow')">🔊 Sound 1</div>
+            </div>
+            <div class="animal-card bird" onclick="reveal(this, 'Bird')">
+                <div class="silhouette">🕊️</div>
+                <div class="sound-badge" onclick="event.stopPropagation(); playAudio('Tweet tweet')">🔊 Sound 2</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Review (Guessing Game) -->
+    <div id="review" class="container">
+        <h2>Guess! What do they like?</h2>
+        <div class="review-wrapper">
+            <!-- Cat Guessing -->
+            <div class="review-col col-cat">
+                <div class="review-header">🐈‍⬛ Cat Likes...</div>
+                <div class="guess-grid">
+                    <div class="guess-card" onclick="revealCard(this, 'The Cat likes the box')">
+                        <span class="q-mark">???</span>
+                        <div class="answer-content"><span>📦</span> the box</div>
+                    </div>
+                    <div class="guess-card" onclick="revealCard(this, 'The Cat likes trees')">
+                        <span class="q-mark">???</span>
+                        <div class="answer-content"><span>🌲</span> trees</div>
+                    </div>
+                    <div class="guess-card" onclick="revealCard(this, 'The Cat likes cars')">
+                        <span class="q-mark">???</span>
+                        <div class="answer-content"><span>🚗</span> cars</div>
+                    </div>
+                    <div class="guess-card" onclick="revealCard(this, 'The Cat likes sleeping')">
+                        <span class="q-mark">???</span>
+                        <div class="answer-content"><span>😴</span> sleeping</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Bird Guessing -->
+            <div class="review-col col-bird">
+                <div class="review-header">🕊️ Bird Likes...</div>
+                <div class="guess-grid">
+                    <div class="guess-card" onclick="revealCard(this, 'The Bird likes worms')">
+                        <span class="q-mark">???</span>
+                        <div class="answer-content"><span>🐛</span> worms</div>
+                    </div>
+                    <div class="guess-card" onclick="revealCard(this, 'The Bird likes the wire')">
+                        <span class="q-mark">???</span>
+                        <div class="answer-content"><span>⚡</span> the wire</div>
+                    </div>
+                    <div class="guess-card" onclick="revealCard(this, 'The Bird likes singing')">
+                        <span class="q-mark">???</span>
+                        <div class="answer-content"><span>🎤</span> singing</div>
+                    </div>
+                    <div class="guess-card" onclick="revealCard(this, 'The Bird likes flying')">
+                        <span class="q-mark">???</span>
+                        <div class="answer-content"><span>🦅</span> flying</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Practice -->
+    <div id="practice" class="container">
+        <div class="top-bar">
+            I like <span id="target-word" style="color:#FFEB3B; text-decoration:underline;">________</span>.
+        </div>
+        <div class="grid-container">
+            <div class="colorful-grid">
+                <div class="vocab-card" onclick="setWord('painting', '🎨')"><div class="v-icon">🎨</div><div class="v-text">painting</div></div>
+                <div class="vocab-card" onclick="setWord('flying', '🦅')"><div class="v-icon">🦅</div><div class="v-text">flying</div></div>
+                <div class="vocab-card" onclick="setWord('stretching', '🙆')"><div class="v-icon">🙆</div><div class="v-text">stretching</div></div>
+                <div class="vocab-card" onclick="setWord('cleaning', '👅')"><div class="v-icon">👅</div><div class="v-text">cleaning</div></div>
+                <div class="vocab-card" onclick="setWord('pizza', '🍕')"><div class="v-icon">🍕</div><div class="v-text">pizza</div></div>
+                <div class="vocab-card" onclick="setWord('dancing', '💃')"><div class="v-icon">💃</div><div class="v-text">dancing</div></div>
+                <div class="vocab-card" onclick="setWord('swimming', '🏊')"><div class="v-icon">🏊</div><div class="v-text">swimming</div></div>
+                <div class="vocab-card" onclick="setWord('reading', '📖')"><div class="v-icon">📖</div><div class="v-text">reading</div></div>
+                <div class="vocab-card" onclick="setWord('sleeping', '😴')"><div class="v-icon">😴</div><div class="v-text">sleeping</div></div>
+                <div class="vocab-card" onclick="setWord('ice cream', '🍦')"><div class="v-icon">🍦</div><div class="v-text">ice cream</div></div>
+                <div class="vocab-card" onclick="setWord('running', '🏃')"><div class="v-icon">🏃</div><div class="v-text">running</div></div>
+                <div class="vocab-card" onclick="setWord('music', '🎵')"><div class="v-icon">🎵</div><div class="v-text">music</div></div>
+                <div class="vocab-card" onclick="setWord('hiding', '🫣')"><div class="v-icon">🫣</div><div class="v-text">hiding</div></div>
+                <div class="vocab-card" onclick="setWord('the box', '📦')"><div class="v-icon">📦</div><div class="v-text">the box</div></div>
+                <div class="vocab-card" onclick="setWord('worms', '🐛')"><div class="v-icon">🐛</div><div class="v-text">worms</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Production -->
+    <div id="production" class="container">
+        <h2>Spin & Act!</h2>
+        <div class="spin-wrapper">
+            <div id="game-icon" class="big-emoji">🎰</div>
+            <div id="game-text" class="big-text">Ready?</div>
+            <button class="spin-btn" onclick="spin()">SPIN!</button>
+        </div>
+    </div>
+
+    <!-- 5. Conclusion -->
+    <div id="conclusion" class="container">
+        <h2>Conclusion</h2>
+        <div class="conclusion-box">
+            <div class="q-large">Do friends have to like <br><span style="color:#EF5350">EVERYTHING</span> the same?</div>
+            <div id="q-btns" class="ans-wrapper">
+                <button class="btn-choice btn-yes" onclick="playAudio('No, try again.'); alert('Try again!')">Yes!</button>
+                <button class="btn-choice btn-no" onclick="finish()">No!</button>
+            </div>
+            <div id="final" class="final-reveal">
+                <div style="font-size:5rem;">🐈‍⬛ ❤️ 🕊️</div>
+                <div style="font-size:2rem; color:#2E7D32; font-weight:bold;">Correct!</div>
+                <div style="font-size:1.5rem;">We both like <b>Painting!</b></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- TTS 音效 ---
+        function playAudio(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'en-US'; u.rate = 0.9;
+                window.speechSynthesis.speak(u);
+            }
+        }
+
+        // --- 頁面切換 ---
+        function switchTab(id) {
+            document.querySelectorAll('.container').forEach(e => e.classList.remove('show'));
+            document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
+            document.getElementById(id).classList.add('show');
+            
+            const tabs = ['warmup', 'review', 'practice', 'production', 'conclusion'];
+            document.querySelectorAll('.nav-btn')[tabs.indexOf(id)].classList.add('active');
+        }
+
+        // --- Warmup ---
+        function reveal(el, name) {
+            el.classList.add('revealed');
+        }
+
+        // --- Review (Guessing Game) ---
+        function revealCard(el, sentence) {
+            if (el.classList.contains('revealed')) {
+                playAudio(sentence); // 已經開過的，點擊只發音
+                return;
+            }
+            el.classList.add('revealed'); // 翻開卡片
+            playAudio(sentence); // 朗讀句子
+        }
+
+        // --- Practice ---
+        function setWord(w, i) {
+            document.getElementById('target-word').innerText = w;
+            playAudio("I like " + w);
+        }
+
+        // --- Production ---
+        const items = [
+            {t:"I like flying!", i:"🦅"}, {t:"I like painting!", i:"🎨"},
+            {t:"I like running!", i:"🏃"}, {t:"I like dancing!", i:"💃"},
+            {t:"I like sleeping!", i:"😴"}
+        ];
+        let spinning = false;
+        function spin() {
+            if(spinning) return; spinning = true;
+            const icon = document.getElementById('game-icon');
+            const text = document.getElementById('game-text');
+            let c = 0;
+            playAudio("Go!");
+            const t = setInterval(() => {
+                const r = items[Math.floor(Math.random()*items.length)];
+                icon.innerText = r.i; text.innerText = "I like...";
+                c++;
+                if(c>15) {
+                    clearInterval(t); spinning = false;
+                    const f = items[Math.floor(Math.random()*items.length)];
+                    icon.innerText = f.i; text.innerText = f.t;
+                    playAudio(f.t);
+                }
+            }, 80);
+        }
+
+        // --- Conclusion ---
+        function finish() {
+            document.getElementById('q-btns').style.display = 'none';
+            document.getElementById('final').style.display = 'block';
+            playAudio("Correct! We both like painting.");
+        }
+    </script>
+</body>
+</html>
